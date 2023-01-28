@@ -1,0 +1,47 @@
+{% extends 'main_hd/layout.html' %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="service__detail-mar-top"></div>
+    {% for el in serviceDetailes %}
+        <div class="service__detail">
+            <div class="service__detail-container">
+                <h3 class="service__detail-id">id зачіски: {{ el.id }}</h3>
+                <p class="service__detail-id__desc">id використовується для запису до перукарні в <a href="https://t.me/hairdresserBydgoszczbot" class="service__detail-tg-link">нашому телеграм боті</a></p>
+                <div class="service__detail-items">
+                    <div class="service__detail-img_container">
+                        <img src="{{ el.photo.url }}" alt="" class="service__detail-img">
+                    </div>
+                
+                    <div class="service__detail-textitems">
+                        <h2 class="service__detail-h2">{{ el.hairdress }}</h2>
+                        <p class="service__detail-desc">{{ el.description }}</p>
+                    </div>
+                </div>
+                <a href="https://t.me/hairdresserBydgoszczbot" class="service__detail-button-link">
+                    <div class="service__detail-button button_styles">
+                        <p class="service__detail-button-text">Записатися на зачіску</p>
+                    </div>
+                </a>
+                
+            </div>
+            
+        </div>
+        <hr class="service__detail-hr" width="1300px">
+    {% endfor %}
+    <nav class="list-pages">
+        <div class="list-pages__container">
+            <ul class="list-pages-ul">
+                    {% for p in paginator.page_range %}
+                        {% if p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                            <li class="page-num">
+                                <a href="?page={{ p }}" class="page-num-a">{{ p }}</a>
+                            </li>
+                        {% endif %}
+                        <br>
+                    {% endfor %}
+            </ul>
+        </div>
+    </nav>
+{% endblock %}

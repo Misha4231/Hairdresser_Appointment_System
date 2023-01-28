@@ -1,0 +1,143 @@
+{% extends 'main_hd/layout.html' %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block content %}
+  <div class="swiper">
+        <div class="swiper__text">
+            <h1 class="swiper__h1">
+                А ти вже лисий?
+            </h1>
+            <p class="swiper__p">Перукарня "Стильна лисина" вітає вас на свойому сайті!</p>
+        </div>
+        <div class="image-slider swiper-container">
+            <!-- Additional required wrapper -->
+            <div class=" image-slider__countainer swiper-wrapper">
+              <div class="image-slider__slide swiper-slide">
+                
+                <div class="image-slider__image">
+                    <img class="image-slider__img" src="{% static 'main_hd/img/main_swiper/01.jpg' %}" alt="">
+                </div>
+              </div>
+              <div class="image-slider__slide swiper-slide">
+                <div class="image-slider__image">
+                    <img class="image-slider__img" src="{% static 'main_hd/img/main_swiper/02.jpg' %}" alt="">
+                </div>
+              </div>
+              <div class="image-slider__slide swiper-slide">
+                
+                <div class="image-slider__image">
+                    <img class="image-slider__img" src="{% static 'main_hd/img/main_swiper/03.jpg' %}" alt="">
+                </div>
+              </div>
+            </div>
+            <!-- If we need pagination -->
+            <div class="swiper-pagination"></div>
+        
+            <!-- If we need navigation buttons -->
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+        </div>
+  </div>
+  <section class="services">
+    <div class="services__container">
+      <h2 class="services-main__text">Наші послуги</h2>
+      <div class="services-cards__container">
+        <div class="card">
+          <a href="">
+            <div class="card__container">
+              <div class="card__items">
+                <div class="cards__img-container">
+                  <img class="cards__img" src="{% static 'main_hd/img/services_cards/01.jpg' %}" alt="">
+                </div>
+                <div class="card__text">
+                  <p class="cards__main-text">Чоловічі стрижки</p>
+                  <p class="cards__secondary-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime sapiente laudantium quo natus dicta tempore perferendis enim assumenda ad culpa.</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="card">
+          <a href="">
+            <div class="card__container">
+              <div class="card__items">
+                <div class="cards__img-container">
+                  <img class="cards__img" src="{% static 'main_hd/img/services_cards/02.jpg' %}" alt="">
+                </div>
+                <div class="card__text">
+                  <p class="cards__main-text">Жіночі стрижки</p>
+                  <p class="cards__secondary-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime sapiente laudantium quo natus dicta tempore perferendis enim assumenda ad culpa.</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="card">
+          <a href="">
+            <div class="card__container">
+              <div class="card__items">
+                <div class="cards__img-container">
+                  <img class="cards__img" src="{% static 'main_hd/img/services_cards/03.jpg' %}" alt="">
+                </div>
+                <div class="card__text">
+                  <p class="cards__main-text">Фарбування волосся</p>
+                  <p class="cards__secondary-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime sapiente laudantium quo natus dicta tempore perferendis enim assumenda ad culpa.</p>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <a href="{% url 'ourservices' %}" class="services-button-link">
+        <div class="services-button">
+          <div class="services-button button_styles"><p class="services-button__text">Перейти до всіх послуг</p></div>
+        </div>
+      </a>
+    </div>
+  </section>
+  <section class="specialist">
+    <div class="specialist__container">
+      <h2 class="specialist__main-text">Головний спеціаліст</h2>
+      <div class="specialist__items">
+        <a href="https://www.facebook.com/" class="specialist-img__link">
+          <div class="specialist__img-container">
+              <img src="{% static 'main_hd/img/specialist/01.png' %}" alt="Тут має бути фото спеціаліста" class="scecialist-img">
+              <div class="specialist__socialmedia"><img src="{% static 'main_hd/img/specialist/01.jpg' %}" alt="" height="150px" width="150px" class="scecialist-img-social"></div>
+          </div>
+        </a>
+        
+        <div class="specialist__list">
+          <li class="specialist__list-item">1 рік інтенсивної практики</li>
+          <li class="specialist__list-item">Нескінченна кількість переглянутих відео уроків</li>
+          <li class="specialist__list-item">Жодного незадоволеного клієнта</li>
+          <li class="specialist__list-item">Закінчені курси</li>
+          <li class="specialist__list-item">У мене закінчились ідеї, але придумайте ще щось</li>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="note">
+    <div class="note__container">
+      <h2 class="note__main-text">Записатися</h2>
+      <div class="note-content">
+        <div class="note__content-label">
+          <p class="note__text">Всі записи проходять в нашому телеграм боті</p>
+        
+        </div>
+        <center>
+          <a href="https://t.me/hairdresserBydgoszczbot" class="note__button-link">
+            <div class="note__button button_styles">
+              <p class="note__button-text">Перейти до телеграм бота</p>
+            </div>
+          </a>
+        </center>
+        
+      </div>
+    </div>
+  </section>
+  <div class="footer"></div>
+{% endblock %}

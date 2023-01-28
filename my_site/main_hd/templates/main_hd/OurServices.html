@@ -1,0 +1,22 @@
+{% extends 'main_hd/layout.html' %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="ourservices">
+        <div class="ourservices__container">
+            <div class="ourservices__items">
+                {% for service in services %}
+                    <a href="{% url 'OurServicesDetail' service.pk %}">
+                        <div class="ourservices__item">
+                            <p class="ourservices__text">{{ service.title }}</p>
+                            <div class="ourservices__img-container">
+                                <img src="{% static 'main_hd/img/ourservices/01.png' %}" alt="" class="ourservices__img-arrow">
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

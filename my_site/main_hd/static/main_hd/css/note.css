@@ -1,0 +1,65 @@
+.note {
+    margin-top: 40px;
+}
+.note__container {
+    margin: auto;
+    max-width: 1300px;
+}
+.note__main-text {
+    font-size: 40px;
+    font-weight: 500;
+    margin-bottom: 35px;
+}
+.note-content {
+}
+.note__content-label {
+    display: flex;
+    justify-content: center;
+}
+.note__img-container {
+    
+}
+.note__tg-logo {
+    max-width: 25px;
+    max-height: 25px;
+}
+.note__text {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.note__button-link {
+}
+.note__button {
+    height: 70px;
+    width: 300px;
+    border-radius: 100px;
+}
+.button_styles{
+    background-color: rgb(113, 168, 113);
+    transition: all 1s ease 0s;
+}
+.button_styles:hover{
+    background-color: rgb(24, 24, 24);
+}
+
+.note__button-text {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 400;
+    padding-top: 25px;
+}
+@media (max-width:767px){
+    .note__main-text{
+        margin-left: 30px;
+    }
+    .note__text{
+        font-size: 13px;
+    }
+}
+
+.footer{
+    margin-top: 50px;
+    height: 80px;
+    background-color: rgb(83, 83, 83);
+}

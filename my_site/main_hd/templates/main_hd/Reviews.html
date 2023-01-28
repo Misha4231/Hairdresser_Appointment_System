@@ -1,0 +1,48 @@
+{% extends 'main_hd/layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="reviews">
+        <div class="reviews__container">
+            <div class="reviews__form__container">
+                {% if is_unique %}
+                    <br>
+                {% else %}
+                    <form action="{% url 'reviews' %}" method="post" class="reviews__form" enctype="multipart/form-data" spellcheck="false" required>
+                        {% csrf_token %}
+                        <textarea name="review_text" id="" cols="30" rows="10" class="reviews__form-textarea reviews__form-input" placeholder="Відгук"></textarea>
+                        <input type="text" name="name" class="reviews__form-input" placeholder="Ім'я">
+                        <input type="text" name="email" class="reviews__form-input" placeholder="E-Mail">
+                        <input type="text" name="ip" id="ip_input" placeholder="IP" value="{{ ip }}" class="reviews__form-input">
+                        <button type="submit" class="reviews__form-input-submit">Опублікувати</button>
+                    </form>
+                {% endif %}
+            </div>
+            <div class="reviews__form-all__reviews">
+                {% for r in Reviews %}
+                <div class="reviews__form-item">
+                    <div class="reviews__form-item__container">
+                        <h4 class="reviews__form-item__user-name">{{ r.name }}</h4>
+                        <p class="reviews__form-item-text">{{ r.review_text }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <nav class="list-pages">
+                <div class="list-pages__container">
+                    <ul class="list-pages-ul">
+                            {% for p in page_obj.paginator.page_range %}
+                                {% if p >= page_obj.number|add:-2 and p <= page_obj.number|add:2 %}
+                                    <li class="page-num">
+                                        <a href="?page={{ p }}" class="page-num-a">{{ p }}</a>
+                                    </li>
+                                {% endif %}
+                                <br>
+                            {% endfor %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+{% endblock %}
