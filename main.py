@@ -10,8 +10,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 import schedule
 
+proxy_url = 'http://proxy.server:3128'
+
 storage = MemoryStorage()
-bot = Bot(TOKEN_API)
+bot = Bot(TOKEN_API, proxy=proxy_url)
 dp = Dispatcher(bot=bot, storage=storage)
 
 def main_bot():
