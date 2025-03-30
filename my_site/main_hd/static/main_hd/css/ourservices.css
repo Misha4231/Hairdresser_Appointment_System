@@ -75,7 +75,6 @@
     margin-right: 40px;
 }
 .service__detail-img {
-    height: 250px;
     width: 250px;
 }
 .service__detail-textitems {
@@ -90,23 +89,7 @@
 }
 .service__detail-button-link {
     float: right;
-}
-.service__detail-button {
-    
-    height: 75px;
-    width: 200px;
-    text-align: center;
-    border-radius: 70px;
-    
-}
-.service__detail-button-text {
-    color: #fff;
-    font-weight: 500;
-    font-size: 16px;
-    padding-top: 21px;
-    padding-left: 10px;
-    padding-right: 10px;
-    
+    text-decoration: underline;
 }
 .service__detail-hr {
 }

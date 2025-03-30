@@ -8,10 +8,10 @@ from django.http import request
 from django.urls import reverse_lazy
 
 def HomePage(request):
-    return render(request, 'main_hd/HomePage.html', {'title': 'Головна стоінка'})
+    return render(request, 'main_hd/HomePage.html', {'title': 'Home page'})
 
 def SingUp(request):
-    return render(request, 'main_hd/SingUp.html', {'title': 'Записатися'})
+    return render(request, 'main_hd/SingUp.html', {'title': 'Make an appointment'})
 
 
 def Reviews(request):
@@ -37,7 +37,7 @@ def Reviews(request):
     else:
         form = ReviewsForm()
 
-    return render(request, "main_hd/reviews.html", {'title': 'Відгуки', 'Reviews': page_obj, 'ip': client_ip, 'is_unique': is_unique, 'page_obj': page_obj})
+    return render(request, "main_hd/reviews.html", {'title': 'Reviews', 'Reviews': page_obj, 'ip': client_ip, 'is_unique': is_unique, 'page_obj': page_obj})
 
 def get_client_ip(request):        
     x_forward_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -50,13 +50,13 @@ def get_client_ip(request):
 
 def OurServices(request):
     services = Category.objects.all()
-    return render(request, 'main_hd/OurServices.html', {'title': 'Послуги', 'services': services})
+    return render(request, 'main_hd/OurServices.html', {'title': 'Services', 'services': services})
 
 class OurServicesDetail(ListView):
     paginate_by = 10
     model = HairdressModel
     template_name = 'main_hd/OurServicesDetail.html'
-    extra_context = {'title': 'Послуги'}
+    extra_context = {'title': 'Services'}
     context_object_name = 'serviceDetailes'
 
     def get_queryset(self):

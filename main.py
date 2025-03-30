@@ -8,19 +8,23 @@ import sqlite3 as sq
 from aiogram.dispatcher.filters import Text
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
+from dotenv import load_dotenv
 
-proxy_url = 'http://proxy.server:3128'
+load_dotenv()
 
 storage = MemoryStorage()
-bot = Bot(os.environ['TOKEN_API'], proxy=proxy_url)
+bot = Bot(os.environ['TOKEN_API'])
 dp = Dispatcher(bot=bot, storage=storage)
+
+admin_id = os.environ['ADMIN_ID']
+website_domain = os.environ['WEBSITE_DOMAIN']
 
 def main_bot():
     db = sq.connect('my_site/sqlite3.db')
     cur = db.cursor()
 
-    datetomonth = {1: 'Січень', 2: 'Лютий', 3: 'Березень', 4: 'Квітень', 5: 'Травень', 6: 'Червень', 7: 'Липень', 8: 'Серпень', 9: 'Вересень', 10: 'Жовтень', 11: 'Листопад', 12: 'Грудень'}
-    monthcount = {'Січень': 31, 'Лютий': 28, 'Березень': 31, 'Квітень': 30, 'Травень': 31, 'Червень': 30, 'Липень': 31, 'Серпень': 31, 'Вересень': 30, 'Жовтень': 31, 'Листопад': 30, 'Грудень': 31}
+    datetomonth = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August', 9: 'September', 10: 'October', 11: 'November', 12: 'December'}
+    monthcount = {'January': 31, 'February': 28, 'March': 31, 'April': 30, 'May': 31, 'June': 30, 'July': 31, 'August': 31, 'September': 30, 'October': 31, 'November': 30, 'December': 31}
     now = str(datetime.datetime.now())
     now_date = int(now.split()[0].split('-')[2])
     now_month = int(now[5]+now[6])
@@ -112,72 +116,68 @@ def main_bot():
     @dp.message_handler(commands=['start'])
     async def start_cmd(message: types.Message):
         await start_db()
-        await bot.send_message(message.chat.id, 'Вітаємо вас в телеграм боті перукарні "Cтильна лисина"', reply_markup=get_start_kb())
+        await bot.send_message(message.chat.id, 'Welcome to the schedule bot', reply_markup=get_start_kb())
 
-    @dp.message_handler(Text(equals='Записатися🗓'))
+    @dp.message_handler(Text(equals='Make an appointment🗓'))
     async def start1_cmd(message: types.Message):
         await start_db()
 
-        await bot.send_message(message.chat.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,False))
+        await bot.send_message(message.chat.id, 'Choose date', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,False))
 
-    @dp.message_handler(Text(equals='Подивитися свої записи📕'))
+    @dp.message_handler(Text(equals='My appointments📕'))
     async def check_notes_handler(message: types.Message):
         user_notes = get_user_notes(message.chat.id)
         for i in user_notes:
-            await bot.send_message(message.chat.id, f"""Дата і час: {i[2]}
-Послуга: {i[3]} {i[4]}
-Номер телефна: {i[5]}
-Локація: {i[6]} {i[7]}
-Коментарій: {i[8]}""")
+            await bot.send_message(message.chat.id, f"""Date and time: {i[2]}
+Service: {i[3]} {i[4]}
+Phone number: {i[5]}
+Location: {i[6]} {i[7]}
+Comment: {i[8]}""")
 
-    @dp.message_handler(Text(equals='Відмінити запис💔'))
+    @dp.message_handler(Text(equals='Cancel an appointment💔'))
     async def cancel_note_handler(message: types.Message):
         user_notes = get_user_notes(message.chat.id)
         for i in user_notes:
             if cancel_note_date_check(i[2]) == False:
                 continue
             else:
-                await bot.send_message(message.chat.id, f"""Дата і час: {i[2]}
-Послуга: {i[3]} {i[4]}
-Номер телефна: {i[5]}
-Локація: {i[6]} {i[7]}
-Коментарій: {i[8]}""", reply_markup=note_cancel_ikb(i[0]))
+                await bot.send_message(message.chat.id, f"""Date and time: {i[2]}
+Service: {i[3]} {i[4]}
+Phone number: {i[5]}
+Location: {i[6]} {i[7]}
+Comment: {i[8]}""", reply_markup=note_cancel_ikb(i[0]))
 
     @dp.callback_query_handler(Text(endswith='cancel'))
     async def user_note_cancel_handler(callback: types.CallbackQuery):
         note_id = int(callback.data.split('_')[0])
         i = note_cancel_information(note_id)[0]
         note_cancel(note_id)
-        await bot.send_message('811338310', f"""!!!Відміна запису!!!
-Дата і час: {i[2]}
-Послуга: {i[3]} {i[4]}
-Номер телефна: {i[5]}
-Локація: {i[6]} {i[7]}
-Коментарій: {i[8]}""")
-        await bot.send_message(callback.from_user.id, 'Запис відмінено')
+        await bot.send_message(admin_id, f"""!!!Appointment cancellation!!!
+Date and time: {i[2]}
+Service: {i[3]} {i[4]}
+Phone number: {i[5]}
+Location: {i[6]} {i[7]}
+Comment: {i[8]}""")
+        await bot.send_message(callback.from_user.id, 'Appointment was cancelled')
 
 
-    @dp.message_handler(Text(equals='Наш сайт🌐'))
+    @dp.message_handler(Text(equals='Our website🌐'))
     async def out_website_handler(message: types.Message):
-        await bot.send_message(message.chat.id, '<a href="http://127.0.0.1:8000/">Натисніть на цей текст щоб перейти на наш сайт</a>', parse_mode='html')
-
-    @dp.message_handler(Text(equals='Автор боту👤'))
-    async def author_handler(message: types.Message):
-        await bot.send_message(message.chat.id, 'Автор боту: @misha06397')
+        await bot.send_message(message.chat.id, f'<a href="{website_domain}">Click on this text to go to our website</a>', parse_mode='html')
 
     @dp.callback_query_handler(Text(equals='go-backFalse'))
     async def go_back_callback(callback: types.CallbackQuery):
         nonlocal selected_date
         nonlocal select_year
         if selected_date == now_month and select_year == now_year:
-            await bot.answer_callback_query(callback_query_id=callback.id, text='Нажаль, час неможливо повернути...', show_alert=True)
+            await bot.answer_callback_query(callback_query_id=callback.id, text='Unfortunately, time cannot be turned back....', show_alert=True)
             return 0
         elif selected_date == 1:
             selected_date = 12
             select_year -= 1
         else:
             selected_date = selected_date-1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,False))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,False))
 
     @dp.callback_query_handler(Text(equals='go-directFalse'))
     async def go_back_callback(callback: types.CallbackQuery):
@@ -188,21 +188,21 @@ def main_bot():
             select_year += 1
         else:
             selected_date = selected_date+1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,False))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,False))
 
     @dp.callback_query_handler(Text(equals='go-backTime'))
     async def go_back_callback(callback: types.CallbackQuery):
         nonlocal selected_date
         nonlocal select_year
         if selected_date == now_month and select_year == now_year:
-            await bot.answer_callback_query(callback_query_id=callback.id, text='Нажаль, час неможливо повернути...', show_alert=True)
+            await bot.answer_callback_query(callback_query_id=callback.id, text='Unfortunately, time cannot be turned back...', show_alert=True)
             return 0
         elif selected_date == 1:
             selected_date = 12
             select_year -= 1
         else:
             selected_date = selected_date-1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,'Time'))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,'Time'))
 
     @dp.callback_query_handler(Text(equals='go-directTime'))
     async def go_back_callback(callback: types.CallbackQuery):
@@ -213,33 +213,33 @@ def main_bot():
             select_year += 1
         else:
             selected_date = selected_date+1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,'Time'))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(selected_date), monthcount.get(datetomonth.get(selected_date)), select_year,'Time'))
 
     @dp.message_handler(commands=['admin'])
     async def admin_cmd(message: types.Message):
-        if message.from_user.id in ['811338310'] == False:
-            await message.answer('Ви не адміністратор!')
+        if message.from_user.id in [admin_id] == False:
+            await message.answer('You are not an administrator.!')
 
         else:
-            await bot.send_message(message.chat.id, 'Виберіть опцію:', reply_markup=admin_main_ikb())
+            await bot.send_message(message.chat.id, 'Select an option:', reply_markup=admin_main_ikb())
 
     @dp.callback_query_handler(Text(equals='date-block'))
     async def date_block(callback: types.CallbackQuery):
-        await bot.send_message(callback.from_user.id, 'Виберіть дату яку потрібно заблокувати', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,True))
+        await bot.send_message(callback.from_user.id, 'Select the date you want to block', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,True))
 
     @dp.callback_query_handler(Text(equals='go-backTrue'))
     async def go_back_callback(callback: types.CallbackQuery):
         nonlocal select_date_admin
         nonlocal select_year_admin
         if select_date_admin == now_month and select_year_admin == now_year:
-            await bot.answer_callback_query(callback_query_id=callback.id, text='Нажаль, час неможливо повернути...', show_alert=True)
+            await bot.answer_callback_query(callback_query_id=callback.id, text='Unfortunately, time cannot be turned back...', show_alert=True)
             return 0
         elif select_date_admin == 1:
             select_date_admin = 12
             select_year_admin -= 1
         else:
             select_date_admin = select_date_admin-1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(select_date_admin), monthcount.get(datetomonth.get(select_date_admin)), select_year_admin,True))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(select_date_admin), monthcount.get(datetomonth.get(select_date_admin)), select_year_admin,True))
 
     @dp.callback_query_handler(Text(equals='go-directTrue'))
     async def go_back_callback(callback: types.CallbackQuery):
@@ -250,51 +250,51 @@ def main_bot():
             select_year_admin += 1
         else:
             select_date_admin = select_date_admin+1
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(select_date_admin), monthcount.get(datetomonth.get(select_date_admin)), select_year_admin,True))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(select_date_admin), monthcount.get(datetomonth.get(select_date_admin)), select_year_admin,True))
 
     @dp.callback_query_handler(Text(startswith='unblock'))
     async def unblock_date(callback: types.CallbackQuery):
         date = callback.data.replace('unblock', '').replace('_True', '')
         delete_date(date)
-        await bot.send_message(callback.from_user.id, f'{block_back_message(date)} знову у головному календарі!')
+        await bot.send_message(callback.from_user.id, f'{block_back_message(date)} back in the main calendar!')
 
     @dp.callback_query_handler(Text(startswith='_'))
     async def date_callback(callback: types.CallbackQuery, state: FSMContext):
         if 'True' in callback.data:
             date = callback.data[:-5]
             await block_date(date)
-            await bot.send_message(callback.from_user.id, f'{block_back_message(callback.data)[2:]} Заблоковано, якщо ви це зробили випадково, то натисніть на кнопку нижче', reply_markup=unblock_data_ikb(callback.data))
+            await bot.send_message(callback.from_user.id, f'{block_back_message(callback.data)[2:]} Blocked, if you did this by accident, then click on the button below', reply_markup=unblock_data_ikb(callback.data))
         elif 'Time' in callback.data:
             date = callback.data[:-5]
-            await bot.send_message(callback.from_user.id, 'Виберіть час', reply_markup=await time_choose_ikb('Time',date))
+            await bot.send_message(callback.from_user.id, 'Choose a time', reply_markup=await time_choose_ikb('Time',date))
         else:
             await RecordStates.time.set()
-            await bot.send_message(callback.from_user.id, 'Заповнення форми...', reply_markup=cancel_form_kb())
-            await bot.send_message(callback.from_user.id, 'Виберіть час', reply_markup=await time_choose_ikb(False, block_back_message(callback.data)))
+            await bot.send_message(callback.from_user.id, 'Filling out the form...', reply_markup=cancel_form_kb())
+            await bot.send_message(callback.from_user.id, 'Choose a time', reply_markup=await time_choose_ikb(False, block_back_message(callback.data)))
 
-    @dp.message_handler(Text(equals='Відмінити заповнення форми'), state='*')
+    @dp.message_handler(Text(equals='Cancel filling out the form'), state='*')
     async def stop_handler(message: types.Message, state: FSMContext):
         if state is None:
             return
 
         await state.finish()
-        await bot.send_message(message.chat.id, 'Заповнення форми перервано', reply_markup=get_start_kb())
+        await bot.send_message(message.chat.id, 'Form filling interrupted', reply_markup=get_start_kb())
 
     @dp.callback_query_handler(Text(startswith='time_unblock'))
     async def time_unblock_handler(callback: types.CallbackQuery):
         time = callback.data.replace('time_unblock', '')
         delete_time(time)
 
-        await bot.send_message(callback.from_user.id, f'{time[2:]} знову в головному календарі!')
+        await bot.send_message(callback.from_user.id, f'{time[2:]} back in the main calendar!')
 
     @dp.callback_query_handler(Text(equals='time-block'))
     async def time_for_block_handler(callback: types.CallbackQuery):
-        await bot.send_message(callback.from_user.id, 'Виберіть дату', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,'Time'))
+        await bot.send_message(callback.from_user.id, 'Select date', reply_markup=kalendar_ikb(datetomonth.get(now_month), monthcount.get(datetomonth.get(now_month)), now_year,'Time'))
 
     @dp.callback_query_handler(Text(endswith='Time'), Text(startswith='#'))
     async def time_block_handler(callback: types.CallbackQuery):
         block_time(callback.data[:-5])
-        await bot.send_message(callback.from_user.id, f'{callback.data[2:][:-5]} заблоковано, якщо ви це зробили випадково, то натисныть на кнопку нижче', reply_markup=unblock_time_ikb(callback.data[:-5]))
+        await bot.send_message(callback.from_user.id, f'{callback.data[2:][:-5]} blocked, if you did this by accident, click the button below', reply_markup=unblock_time_ikb(callback.data[:-5]))
 
 
     @dp.callback_query_handler(Text(startswith='#'), state=RecordStates.time)
@@ -302,7 +302,7 @@ def main_bot():
         async with state.proxy() as data:
             data['time'] = block_back_message(callback.data)
 
-        await bot.send_message(callback.from_user.id, 'Выберіть послугу', reply_markup=services_ikb())
+        await bot.send_message(callback.from_user.id, 'Choose a service', reply_markup=services_ikb())
         await RecordStates.next()
 
     @dp.callback_query_handler(state=RecordStates.service)
@@ -313,7 +313,7 @@ def main_bot():
         await RecordStates.next()
         cat_name = callback.data.split('_')[0]
         cat_id = callback.data.split('_')[1]
-        await bot.send_message(callback.from_user.id, f"""Виберіть {cat_name} на нашому <a href="http://127.0.0.1:8000/ourservices/{cat_id}">сайті</a> і відправте його id (id написано біля кожної послуги)""", parse_mode='html')
+        await bot.send_message(callback.from_user.id, f"""Choose {cat_name} on our <a href="{website_domain}/ourservices/{cat_id}">website</a> and send its id (id is written next to each service)""", parse_mode='html')
 
     @dp.message_handler(state=RecordStates.service_id)
     async def service_id_handler(message: types.Message, state: FSMContext):
@@ -322,9 +322,9 @@ def main_bot():
             async with state.proxy() as data:
                 data['service_id'] = service_course[0]
             await RecordStates.next()
-            await bot.send_message(message.chat.id, 'Напишіть свій контактний номер телефону')
+            await bot.send_message(message.chat.id, 'Write your contact phone number')
         except:
-            await bot.send_message(message.chat.id, 'Нажаль такого id не існує, надішліть коректний')
+            await bot.send_message(message.chat.id, 'Unfortunately, such an id does not exist, please send a correct one.')
 
 
     @dp.message_handler(state=RecordStates.phone_number)
@@ -333,7 +333,7 @@ def main_bot():
             data['phone_number'] = message.text
 
         await RecordStates.next()
-        await bot.send_message(message.chat.id, 'Оберіть місце', reply_markup=where())
+        await bot.send_message(message.chat.id, 'Choose a place', reply_markup=where())
 
     @dp.callback_query_handler(state = RecordStates.where_location)
     async def where_location_handler(callback: types.CallbackQuery, state: FSMContext):
@@ -341,45 +341,45 @@ def main_bot():
             data['where_location'] = callback.data
         await RecordStates.next()
 
-        if callback.data == 'Виїзд':
-            await bot.send_message(callback.from_user.id, 'Напишіть свою точну адресу')
+        if callback.data == 'Departure':
+            await bot.send_message(callback.from_user.id, 'Write your exact address')
 
             @dp.message_handler(state=RecordStates.location)
             async def adress_location_handler(message: types.Message, state: FSMContext):
                 async with state.proxy() as data:
                     data['location'] = message.text
                 await RecordStates.next()
-                await bot.send_message(callback.from_user.id, 'Напишіть власні побажання')
+                await bot.send_message(callback.from_user.id, 'Write your own wishes')
 
         else:
             async with state.proxy() as data:
                 data['location'] = '-'
             await RecordStates.next()
-            await bot.send_message(callback.from_user.id, 'Напишіть власні побажання')
+            await bot.send_message(callback.from_user.id, 'Write your own wishes')
 
 
     @dp.message_handler(state = RecordStates.description)
     async def desc_handler(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['description'] = message.text
-            await bot.send_message(message.chat.id, f"""Послуга: {data['service']}  {data['service_id']}\nДата і час: {data['time']}\nНомер телефону: {data['phone_number']}\nМісце: {data['where_location']} {data['location']}\nКоментарій: {data['description']}""")
+            await bot.send_message(message.chat.id, f"""Service: {data['service']}  {data['service_id']}\nDate and time: {data['time']}\nPhone Number: {data['phone_number']}\nLocation: {data['where_location']} {data['location']}\nComment: {data['description']}""")
 
         await RecordStates.next()
-        await bot.send_message(message.chat.id, 'Все правильно?', reply_markup=is_correct_ikb())
+        await bot.send_message(message.chat.id, 'Everything right?', reply_markup=is_correct_ikb())
 
     @dp.callback_query_handler(state=RecordStates.is_correct)
     async def is_correct_handler(callback: types.CallbackQuery, state: FSMContext):
         if callback.data == 'all_correct':
             async with state.proxy() as data:
                 add_note(data, callback.from_user.id)
-                await bot.send_message(chat_id='811338310', text=f"Послуга: {data['service']}  {data['service_id']}\nДата і час: {data['time']}\nНомер телефону: {data['phone_number']}\nМісце: {data['where_location']} {data['location']}\nКоментарій: {data['description']}")
+                await bot.send_message(chat_id=admin_id, text=f"""Service: {data['service']}  {data['service_id']}\nDate and time: {data['time']}\nPhone Number: {data['phone_number']}\nLocation: {data['where_location']} {data['location']}\nComment: {data['description']}""")
 
-                await bot.send_message(chat_id='811338310', text='Приймаємо?', reply_markup=accept_ikb(get_id_of_note(data)))
+                await bot.send_message(chat_id=admin_id, text='Accept?', reply_markup=accept_ikb(get_id_of_note(data)))
 
 
-            await bot.send_message(callback.from_user.id, 'Ваш запис відправлений головному перукару, як тільки вона погодиться, ми вам дамо знати', reply_markup=get_start_kb())
+            await bot.send_message(callback.from_user.id, 'Your entry has been sent, we will let you know about responce as soon as possible.', reply_markup=get_start_kb())
         else:
-            await bot.send_message(callback.from_user.id, 'Запис відхилено', reply_markup=get_start_kb())
+            await bot.send_message(callback.from_user.id, 'Appointment rejected', reply_markup=get_start_kb())
 
         await state.finish()
 
@@ -389,8 +389,8 @@ def main_bot():
             note_id = get_note_id(callback.data)
             accept_note(note_id)
             time_for_block = time_for_block_db(note_id)
-            await bot.send_message(callback.from_user.id, 'Запис прийнято!')
-            await bot.send_message(chat_id=str(get_userid(note_id)), text='Ваш запис прийнятий')
+            await bot.send_message(callback.from_user.id, 'Appointment accepted!')
+            await bot.send_message(chat_id=str(get_userid(note_id)), text='Appointment accepted')
             block_time(time_for_block)
             block_time_range(note_id)
         else:
@@ -398,7 +398,7 @@ def main_bot():
 
             delete_note(note_id)
 
-            await bot.send_message(callback.from_user.id, 'Запис відхилено')
+            await bot.send_message(callback.from_user.id, 'Appointment rejected')
 
     @dp.callback_query_handler(Text(equals='today-notes'))
     async def today_notes_handler(callback: types.CallbackQuery):
@@ -406,31 +406,30 @@ def main_bot():
         notes_from_t_and_to = get_notes_from_t_and_to(day)
         for i in notes_from_t_and_to:
             i = i[0]
-            await bot.send_message(callback.from_user.id, f"""Дата і час: {i[2]}
-    Послуга: {i[3]} {i[4]}
-    Номер телефна: {i[5]}
-    Локація: {i[6]} {i[7]}
-    Коментарій: {i[8]}
-    користувач: {i[1]}""")
+            await bot.send_message(callback.from_user.id, f"""Date and time: {i[2]}
+    Service: {i[3]} {i[4]}
+    Pgone number: {i[5]}
+    Location: {i[6]} {i[7]}
+    Comment: {i[8]}
+    User: {i[1]}""")
 
     @dp.callback_query_handler(Text(equals='all-notes'))
     async def all_notes_handler(callback: types.CallbackQuery):
         all_notes = get_all_notes()
         for i in all_notes:
-            await bot.send_message(callback.from_user.id, f"""Дата і час: {i[2]}
-    Послуга: {i[3]} {i[4]}
-    Номер телефна: {i[5]}
-    Локація: {i[6]} {i[7]}
-    Коментарій: {i[8]}
-    користувач: {i[1]}""")
+            await bot.send_message(callback.from_user.id, f"""Date and time: {i[2]}
+    Service: {i[3]} {i[4]}
+    Pgone number: {i[5]}
+    Location: {i[6]} {i[7]}
+    Comment: {i[8]}
+    User: {i[1]}""")
 
     def get_start_kb():
         kb = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-        kb.add(KeyboardButton(text='Записатися🗓'))
-        kb.insert(KeyboardButton(text='Подивитися свої записи📕'))
-        kb.insert(KeyboardButton(text='Відмінити запис💔'))
-        kb.add(KeyboardButton(text='Наш сайт🌐'))
-        kb.add(KeyboardButton(text='Автор боту👤'))
+        kb.add(KeyboardButton(text='Make an appointment🗓'))
+        kb.insert(KeyboardButton(text='View my appointments📕'))
+        kb.insert(KeyboardButton(text='Cancel an appointment💔'))
+        kb.add(KeyboardButton(text='Our website🌐'))
 
         return kb
 
@@ -491,23 +490,24 @@ def main_bot():
 
     def admin_main_ikb():
         ikb = InlineKeyboardMarkup(row_width=3)
-        ikb.add(InlineKeyboardButton(text='Заблокувати дату', callback_data='date-block'))
-        ikb.add(InlineKeyboardButton(text='Заблокувати час', callback_data='time-block'))
-        ikb.add(InlineKeyboardButton(text='Записи на сьогодні і завтра', callback_data='today-notes'))
-        ikb.add(InlineKeyboardButton(text='Записи за весь час', callback_data='all-notes'))
+        ikb.add(InlineKeyboardButton(text='Block date', callback_data='date-block'))
+        ikb.add(InlineKeyboardButton(text='Block time', callback_data='time-block'))
+        ikb.add(InlineKeyboardButton(text='Appointments for today and tomorrow', callback_data='today-notes'))
+        ikb.add(InlineKeyboardButton(text='All appointments', callback_data='all-notes'))
+
 
         return ikb
 
     def unblock_data_ikb(date):
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text=f'Відмінити блокування дати ({block_back_message(date)})',
+        ikb.add(InlineKeyboardButton(text=f'Unblock date ({block_back_message(date)})',
                                      callback_data=f'unblock{date}'))
 
         return ikb
 
     def unblock_time_ikb(time):
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text=f'Відмінити блокування дати ({block_back_message(time)})',
+        ikb.add(InlineKeyboardButton(text=f'Unblock date ({block_back_message(time)})',
                                      callback_data=f'time_unblock{time}'))
 
         return ikb
@@ -524,34 +524,34 @@ def main_bot():
 
     def where():
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text='До вас приїдуть (+20zł)', callback_data='Виїзд'))
-        ikb.add(InlineKeyboardButton(text='Ви приїдете (+0zł)', callback_data='Вдома'))
+        ikb.add(InlineKeyboardButton(text='They will come to you.', callback_data='Hairdresser will arrive to you'))
+        ikb.add(InlineKeyboardButton(text='You will arrive.', callback_data='You will arrive to studio'))
 
         return ikb
 
     def is_correct_ikb():
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text='Так, все правильно', callback_data='all_correct'))
-        ikb.add(InlineKeyboardButton(text='Ні, почати запис заново', callback_data='not_correct'))
+        ikb.add(InlineKeyboardButton(text='Yes, everything is correct', callback_data='all_correct'))
+        ikb.add(InlineKeyboardButton(text='No, start recording again', callback_data='not_correct'))
 
         return ikb
 
     def accept_ikb(note_id):
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text='Так', callback_data=f'yes_{note_id}_accept'))
-        ikb.add(InlineKeyboardButton(text='Ні', callback_data=f'no_{note_id}_accept'))
+        ikb.add(InlineKeyboardButton(text='Yes', callback_data=f'yes_{note_id}_accept'))
+        ikb.add(InlineKeyboardButton(text='No', callback_data=f'no_{note_id}_accept'))
 
         return ikb
 
     def note_cancel_ikb(id):
         ikb = InlineKeyboardMarkup(row_width=1)
-        ikb.add(InlineKeyboardButton(text='Відмінити запис', callback_data=f'{id}_cancel'))
+        ikb.add(InlineKeyboardButton(text='Cancel appointment', callback_data=f'{id}_cancel'))
 
         return ikb
 
     def cancel_form_kb():
         kb = ReplyKeyboardMarkup(resize_keyboard=True)
-        kb.add(KeyboardButton(text='Відмінити заповнення форми'))
+        kb.add(KeyboardButton(text='Cancel filling out the form'))
 
         return kb
 
@@ -580,9 +580,29 @@ def main_bot():
         db.commit()
 
     def get_id_of_note(data):
-        note_id = cur.execute(
-            f"SELECT id FROM main_hd_notesmodel WHERE  time='{data['time']}' AND service='{data['service']}' AND service_id='{data['service_id']}' AND phone_number='{data['phone_number']}' AND where_location='{data['where_location']}' AND location='{data['location']}' AND description='{data['description']}'").fetchone()
-        db.commit()
+        query = """
+            SELECT id 
+            FROM main_hd_notesmodel 
+            WHERE time=? 
+            AND service=? 
+            AND service_id=? 
+            AND phone_number=? 
+            AND where_location=? 
+            AND location=? 
+            AND description=?
+        """
+
+        # Execute the query with the data values as parameters
+        note_id = cur.execute(query, (
+            data['time'],
+            data['service'],
+            data['service_id'],
+            data['phone_number'],
+            data['where_location'],
+            data['location'],
+            data['description']
+        )).fetchone()
+
         return note_id
 
     def accept_note(note_id):

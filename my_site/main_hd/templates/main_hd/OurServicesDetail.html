@@ -7,8 +7,8 @@
     {% for el in serviceDetailes %}
         <div class="service__detail">
             <div class="service__detail-container">
-                <h3 class="service__detail-id">id зачіски: {{ el.id }}</h3>
-                <p class="service__detail-id__desc">id використовується для запису до перукарні в <a href="https://t.me/hairdresserBydgoszczbot" class="service__detail-tg-link">нашому телеграм боті</a></p>
+                <h3 class="service__detail-id">Hairstyle ID: {{ el.id }}</h3>
+                <p class="service__detail-id__desc">The ID is used for booking an appointment at the barbershop in <a href="" class="service__detail-tg-link">our Telegram bot</a></p>
                 <div class="service__detail-items">
                     <div class="service__detail-img_container">
                         <img src="{{ el.photo.url }}" alt="" class="service__detail-img">
@@ -19,14 +19,10 @@
                         <p class="service__detail-desc">{{ el.description }}</p>
                     </div>
                 </div>
-                <a href="https://t.me/hairdresserBydgoszczbot" class="service__detail-button-link">
-                    <div class="service__detail-button button_styles">
-                        <p class="service__detail-button-text">Записатися на зачіску</p>
-                    </div>
+                <a href="" class="service__detail-button-link">
+                    Book a Hairstyle
                 </a>
-                
             </div>
-            
         </div>
         <hr class="service__detail-hr" width="1300px">
     {% endfor %}

@@ -41,7 +41,7 @@
 }
 .specialist__socialmedia:hover{
     background-color: rgba(0,0,0,.5);
-    opacity: 1;
+    
 }
 @media (max-width:767px){
     .specialist{
