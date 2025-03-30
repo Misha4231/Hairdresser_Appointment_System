@@ -1,19 +1,18 @@
 from aiogram import types, Dispatcher, executor, Bot
 from aiogram.dispatcher.filters.state import StatesGroup,State
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from config import *
+import os
 from datetime import date
 import datetime
 import sqlite3 as sq
 from aiogram.dispatcher.filters import Text
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-import schedule
 
 proxy_url = 'http://proxy.server:3128'
 
 storage = MemoryStorage()
-bot = Bot(TOKEN_API, proxy=proxy_url)
+bot = Bot(os.environ['TOKEN_API'], proxy=proxy_url)
 dp = Dispatcher(bot=bot, storage=storage)
 
 def main_bot():
@@ -471,7 +470,7 @@ def main_bot():
     async def time_choose_ikb(admin, date):
         ikb = InlineKeyboardMarkup(row_width=2)
         all_blocked_time = get_blocked()
-#_2023_Січень_27
+
         if admin == False:
             date = date.replace(' ', '_')
             for hour in range(10, 19):
@@ -694,7 +693,6 @@ def main_bot():
         return time
 
     def get_today_day(now):
-        # 2023-01-17 16:59:43.605120
         r = now.split()[0].split('-')[-1]
         return r
 
@@ -718,7 +716,6 @@ def main_bot():
             return False
 
     if __name__=='__main__':
-
         executor.start_polling(dp)
 
 
@@ -727,6 +724,3 @@ def main():
 
 if __name__=='__main__':
     main()
-    #schedule.every().day.at('00:01').do(main)
-    #while True:
-    #    schedule.run_pending()
